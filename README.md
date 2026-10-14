@@ -1,6 +1,6 @@
 # OpenClimate: Climate Science & Earth Systems Catalog
 
-An academic catalog indexing freely available university courses, open-access textbooks, interactive physics simulators, and authoritative global assessments in climate science, atmospheric dynamics, and physical oceanography. 
+An academic catalog indexing freely available university courses, open-access textbooks, interactive physics simulators, and authoritative global assessments in climate science and earth sciences.
 
 ## Contents
 
