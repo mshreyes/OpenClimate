@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClimate | Climate Science & Earth Systems Catalog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-elevated: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #238636; /* Climate Green */
+      --accent-hover: #2ea043;
+      --accent-border: #2ea043;
+      --accent-glow: rgba(46, 160, 67, 0.2);
+      --tag-bg: #1c2128;
+      --tag-border: #373e47;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f6f8fa;
+      --surface: #ffffff;
+      --surface-elevated: #f0f2f5;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #656d76;
+      --accent: #1a7f37;
+      --accent-hover: #15662c;
+      --accent-border: #1a7f37;
+      --accent-glow: rgba(26, 127, 55, 0.15);
+      --tag-bg: #eaeef2;
+      --tag-border: #d0d7de;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-badge {
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .brand h1 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .search-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.85rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      width: 260px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .search-box:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .nav-tabs {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 1.5rem;
+      gap: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .nav-tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.8rem 0.25rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .nav-tab-btn.active {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .nav-tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .app-viewport {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .view-page {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    .view-page.active {
+      display: flex;
+    }
+
+    /* Course Catalog Layout */
+    .catalog-aside {
+      width: 380px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .filter-bar {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .filter-pill {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .filter-pill.active, .filter-pill:hover {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .course-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.6rem;
+    }
+
+    .course-card {
+      padding: 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.02);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .course-card:hover {
+      background: var(--surface-elevated);
+      border-color: var(--border);
+    }
+
+    .course-card.active {
+      background: var(--surface-elevated);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .course-card-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.35rem;
+    }
+
+    .course-card-code {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .course-card-provider {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .course-card-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 0.35rem;
+    }
+
+    .catalog-main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .details-pane {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .details-pane h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .metadata-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.85rem;
+      margin: 1.25rem 0;
+      padding: 1rem;
+      background: var(--surface-elevated);
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    .metadata-grid span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .action-links {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1.25rem 0;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text-muted);
+    }
+
+    .lecture-breakdown {
+      margin-top: 1.5rem;
+    }
+
+    .section-label {
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .lecture-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .lecture-item {
+      padding: 0.75rem 1rem;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      font-size: 0.88rem;
+    }
+
+    .lecture-num {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* Reports & Open Books Layout */
+    .publications-view {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      max-width: 1080px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .pub-group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .pub-group-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pub-card {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .pub-card:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .pub-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .pub-title-link {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .pub-title-link:hover {
+      color: var(--accent);
+    }
+
+    .pub-meta {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .pub-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .error-box {
+      border: 1px solid #f85149;
+      background: rgba(248, 81, 73, 0.1);
+      color: var(--text);
+      padding: 1.5rem;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+  <div class="brand">
+    <span class="brand-badge">OPENCLIMATE</span>
+    <h1>Climate Science & Earth Systems Catalog</h1>
+  </div>
+    <div class="header-actions">
+      <input type="text" id="courseSearch" class="search-box" placeholder="Filter topics, courses, dynamics...">
+      <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme">
+        <span id="themeIcon">&cir;</span>
+        <span id="themeLabel">Theme</span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="nav-tab-btn active" data-target="courses-page">Course Catalog</button>
+    <button class="nav-tab-btn" data-target="publications-page">Open Books & Institutional Reports (IPCC, UNEP, WMO)</button>
+  </nav>
+
+  <div class="app-viewport">
+    
+    <!-- PAGE 1: COURSES -->
+    <div class="view-page active" id="courses-page">
+      <aside class="catalog-aside">
+        <div class="filter-bar" id="categoryFilters">
+          <button class="filter-pill active" data-cat="all">All Domains</button>
+          <button class="filter-pill" data-cat="Physical Climate Science">Physical Science</button>
+          <button class="filter-pill" data-cat="Climate Dynamics">Climate Dynamics</button>
+          <button class="filter-pill" data-cat="Remote Sensing & Observation">Remote Sensing</button>
+          <button class="filter-pill" data-cat="Energy Systems & Mitigation">Energy & Mitigation</button>
+          <button class="filter-pill" data-cat="Policy & Adaptation">Policy & Adaptation</button>
+        </div>
+        <div class="course-list" id="courseList"></div>
+      </aside>
+
+      <main class="catalog-main" id="courseDetailMain">
+        <!-- Dynamically populated -->
+      </main>
+    </div>
+
+    <!-- PAGE 2: OPEN BOOKS & REPORTS -->
+    <div class="view-page" id="publications-page">
+      <div class="publications-view" id="publicationsContainer">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    // --- Theme Management ---
+    const themeToggleBtn = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+    const themeLabel = document.getElementById("themeLabel");
+
+    function getPreferredTheme() {
+      const stored = localStorage.getItem("climate_hub_theme");
+      if (stored) return stored;
+      return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+
+    function applyTheme(theme) {
+      if (theme === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+        themeIcon.textContent = "☀";
+        themeLabel.textContent = "Light";
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+        themeIcon.textContent = "☾";
+        themeLabel.textContent = "Dark";
+      }
+      localStorage.setItem("climate_hub_theme", theme);
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+      applyTheme(current === "light" ? "dark" : "light");
+    });
+
+    applyTheme(getPreferredTheme());
+
+    // --- DOM Elements ---
+    const courseListEl = document.getElementById("courseList");
+    const courseDetailMainEl = document.getElementById("courseDetailMain");
+    const searchInput = document.getElementById("courseSearch");
+    const publicationsContainer = document.getElementById("publicationsContainer");
+
+    // Tab Navigation
+    document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".nav-tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".view-page").forEach(p => p.classList.remove("active"));
+        
+        btn.classList.add("active");
+        const targetId = btn.getAttribute("data-target");
+        document.getElementById(targetId).classList.add("active");
+      });
+    });
+
+    // Verify CLIMATE_DATA loaded properly from data.js
+    if (typeof CLIMATE_DATA === "undefined" || !Array.isArray(CLIMATE_DATA.courses)) {
+      courseDetailMainEl.innerHTML = `
+        <div class="error-box">
+          <strong>Error: Could not load CLIMATE_DATA from data.js.</strong><br><br>
+          1. Verify that <code>data.js</code> is saved in the exact same folder as <code>index.html</code>.<br>
+          2. Open <code>data.js</code> and ensure no markdown code fences (like <code>\`\`\`javascript</code> or <code>\`\`\`</code>) were copied at the very top or bottom of the file.<br>
+          3. Check the browser Developer Console (F12 &rarr; Console) for the exact line number if there is a syntax typo.
+        </div>
+      `;
+    } else {
+      let activeCourse = CLIMATE_DATA.courses[0];
+      let selectedCategory = "all";
+
+      // Filter Logic
+      document.getElementById("categoryFilters").addEventListener("click", (e) => {
+        if (e.target.tagName === "BUTTON") {
+          document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("active"));
+          e.target.classList.add("active");
+          selectedCategory = e.target.getAttribute("data-cat");
+          renderCourseList();
+        }
+      });
+
+      searchInput.addEventListener("input", renderCourseList);
+
+      function renderCourseList() {
+        const q = searchInput.value.toLowerCase().trim();
+        courseListEl.innerHTML = "";
+
+        const filtered = CLIMATE_DATA.courses.filter(c => {
+          const matchesCat = selectedCategory === "all" || c.domain === selectedCategory;
+          const matchesQuery = c.title.toLowerCase().includes(q) ||
+                               c.code.toLowerCase().includes(q) ||
+                               c.provider.toLowerCase().includes(q) ||
+                               c.summary.toLowerCase().includes(q);
+          return matchesCat && matchesQuery;
+        });
+
+        filtered.forEach(c => {
+          const card = document.createElement("div");
+          card.className = `course-card ${c.id === activeCourse.id ? 'active' : ''}`;
+          card.innerHTML = `
+            <div class="course-card-header">
+              <span class="course-card-code">${c.code}</span>
+              <span class="course-card-provider">${c.provider}</span>
+            </div>
+            <div class="course-card-title">${c.title}</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">${c.domain}</div>
+          `;
+          card.onclick = () => selectCourse(c);
+          courseListEl.appendChild(card);
+        });
+      }
+
+      function selectCourse(c) {
+        activeCourse = c;
+        renderCourseDetails();
+        renderCourseList();
+      }
+
+      function renderCourseDetails() {
+        const googleSearchFallback = `https://www.google.com/search?q=${encodeURIComponent(activeCourse.searchQuery)}`;
+
+        const altButtonHtml = activeCourse.altUrl
+          ? `<a class="btn-action btn-secondary" href="${activeCourse.altUrl}" target="_blank" rel="noopener noreferrer">
+               ${activeCourse.altLabel || 'Open Alternate Edition'} &nearr;
+             </a>`
+          : '';
+
+        const ocwSearchHtml = activeCourse.ocwSearchUrl
+          ? `<a class="btn-action btn-secondary" href="${activeCourse.ocwSearchUrl}" target="_blank" rel="noopener noreferrer">
+               MIT OCW Internal Search &nearr;
+             </a>`
+          : '';
+
+        const directLinksHtml = activeCourse.directLinks && activeCourse.directLinks.length
+          ? `<div class="lecture-breakdown">
+               <div class="section-label">Direct Course Sub-Pages (Syllabus, Notes & PDFs)</div>
+               <div class="action-links" style="margin-top: 0.5rem;">
+                 ${activeCourse.directLinks.map(link => `
+                   <a class="btn-action btn-secondary" href="${link.url}" target="_blank" rel="noopener noreferrer">
+                     ${link.label} &nearr;
+                   </a>
+                 `).join('')}
+               </div>
+             </div>`
+          : '';
+
+        courseDetailMainEl.innerHTML = `
+          <article class="details-pane">
+            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); margin-bottom: 0.35rem;">${activeCourse.code} &bull; ${activeCourse.level}</div>
+            <h2>${activeCourse.title}</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem; line-height: 1.6;">${activeCourse.summary}</p>
+
+            <div class="metadata-grid">
+              <div>
+                <span>Offering Institution</span>
+                <strong>${activeCourse.provider}</strong>
+              </div>
+              <div>
+                <span>Academic Domain</span>
+                <strong>${activeCourse.domain}</strong>
+              </div>
+              <div>
+                <span>Access Model</span>
+                <strong>Free / Open Courseware</strong>
+              </div>
+            </div>
+
+            <div class="action-links">
+              <a class="btn-action btn-primary" href="${activeCourse.courseUrl}" target="_blank" rel="noopener noreferrer">
+                Open Official Course Page &nearr;
+              </a>
+              ${altButtonHtml}
+              ${ocwSearchHtml}
+              <a class="btn-action btn-secondary" href="${googleSearchFallback}" target="_blank" rel="noopener noreferrer">
+                Web Search Fallback &nearr;
+              </a>
+            </div>
+
+            ${directLinksHtml}
+
+            <div class="lecture-breakdown">
+              <div class="section-label">Curriculum Scope: Key Lecture Modules (${activeCourse.lectures.length})</div>
+              <ul class="lecture-list">
+                ${activeCourse.lectures.map((item, idx) => `
+                  <li class="lecture-item">
+                    <span class="lecture-num">#${idx + 1}</span>
+                    <span>${item}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderPublications() {
+        publicationsContainer.innerHTML = "";
+
+        CLIMATE_DATA.publications.forEach(group => {
+          const groupEl = document.createElement("section");
+          groupEl.className = "pub-group";
+          
+          groupEl.innerHTML = `
+            <h2 class="pub-group-title">${group.category}</h2>
+            <div>
+              ${group.items.map(item => `
+                <div class="pub-card">
+                  <div class="pub-header">
+                    <a class="pub-title-link" href="${item.url}" target="_blank" rel="noopener noreferrer">
+                      ${item.title} &nearr;
+                    </a>
+                    <span class="pub-meta">${item.year}</span>
+                  </div>
+                  <div style="font-size: 0.8rem; color: var(--accent); font-family: var(--font-mono);">${item.author}</div>
+                  <p class="pub-desc">${item.description}</p>
+                </div>
+              `).join('')}
+            </div>
+          `;
+          publicationsContainer.appendChild(groupEl);
+        });
+      }
+
+      // Initial Load
+      renderCourseList();
+      renderCourseDetails();
+      renderPublications();
+    }
+  </script>
+</body>
+</html>
